@@ -4,8 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
+import java.util.concurrent.Executors;import com.sun.corba.se.pept.transport.ContactInfo;
 import com.sun.org.apache.xml.internal.utils.URI;
 
 public class MainClass {
@@ -17,7 +16,7 @@ public class MainClass {
 			BufferedReader bufferredReadder = null;
 			FileReader fileReader = null;
 			
-			ExecutorService executor = Executors.newFixedThreadPool(30);
+			ExecutorService executor = Executors.newFixedThreadPool(50);
 			
 			String monitoring=args[0];
 			
@@ -36,17 +35,19 @@ public class MainClass {
 				while ((sCurrentLine = bufferredReadder.readLine()) != null) {
 					String connectionData[] = sCurrentLine.split(",");
 					String connectionUrl = connectionData[0];
-					String username = connectionData[1];
-					String password = connectionData[2];
-					int interval = Integer.parseInt(connectionData[3]);
-					int maxCount = Integer.parseInt(connectionData[4]);
-					String outputPath= connectionData[5];
-					outputPath=outputPath.replaceAll(" ","%20");
-					if(connectionData.length>6) {
-						String nodeName=connectionData[6];
-						executor.execute(new JmxDataGetter(connectionUrl, username, password, interval, maxCount, outputPath,nodeName));
-					}else {
-						executor.execute(new JmxDataGetter(connectionUrl, username, password, interval, maxCount, outputPath));
+					if(!connectionUrl.startsWith("#")) {
+						String username = connectionData[1];
+						String password = connectionData[2];
+						int interval = Integer.parseInt(connectionData[3]);
+						int maxCount = Integer.parseInt(connectionData[4]);
+						String outputPath= connectionData[5];
+						outputPath=outputPath.replaceAll(" ","%20");
+						if(connectionData.length>6) {
+							String nodeName=connectionData[6];
+							executor.execute(new JmxDataGetter(connectionUrl, username, password, interval, maxCount, outputPath,nodeName));
+						}else {
+							executor.execute(new JmxDataGetter(connectionUrl, username, password, interval, maxCount, outputPath));
+						}
 					}
 					
 				}

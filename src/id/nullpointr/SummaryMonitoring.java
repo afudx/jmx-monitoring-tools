@@ -6,11 +6,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.sun.org.apache.xml.internal.utils.URI;
+
 
 public class SummaryMonitoring {
 	String fileName="SumMon_btw_pfrom_and_pend.csv";
@@ -19,6 +23,7 @@ public class SummaryMonitoring {
 	DateFormat dateFormat2=new SimpleDateFormat("yyyyMMddHHmmss");
 	boolean header=true;
 	Long gigaByte=(long) (1024*1024*1024);
+	DecimalFormat df = new DecimalFormat("#.####");  
 	void summary(String path,String from,String end) throws Exception{
 		
 		fileName=fileName.replace("pfrom", from);
@@ -99,18 +104,22 @@ public class SummaryMonitoring {
 				writer.newLine();
 				header=false;
 			}
-			
-			
+			BigDecimal b_count=new BigDecimal(""+count);
+			BigDecimal b_gb=new BigDecimal(""+gigaByte);
+			BigDecimal b_min=new BigDecimal(""+min).divide(b_gb,MathContext.DECIMAL128).setScale(4, RoundingMode.HALF_UP);
+			BigDecimal b_avg=new BigDecimal(""+avg).divide(b_count,MathContext.DECIMAL128);
+			b_avg=b_avg.divide(b_gb,MathContext.DECIMAL128).setScale(4, RoundingMode.HALF_UP);
+			BigDecimal b_max=new BigDecimal(""+max).divide(b_gb,MathContext.DECIMAL128).setScale(4, RoundingMode.HALF_UP);
 			StringBuffer summaryAvg = new StringBuffer();
 			summaryAvg.append(fileName);
 			summaryAvg.append(",");
 			summaryAvg.append(count);
 			summaryAvg.append(",");
-			summaryAvg.append((min/gigaByte));
+			summaryAvg.append(b_min.toString());
 			summaryAvg.append(",");
-			summaryAvg.append(((avg/count)/gigaByte));
+			summaryAvg.append(b_avg.toString());
 			summaryAvg.append(",");
-			summaryAvg.append((max/gigaByte));
+			summaryAvg.append(b_max.toString());
 			writer.append(summaryAvg.toString());
 			writer.newLine();
 			writer.flush();
