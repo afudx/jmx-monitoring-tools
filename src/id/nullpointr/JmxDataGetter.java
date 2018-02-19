@@ -1,6 +1,7 @@
 package id.nullpointr;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -29,6 +30,7 @@ public class JmxDataGetter implements Runnable{
 	int maxCount = 0;
 	int interval = 1;
 	String outputPath = null;
+	String nodeNameAdditional=null;
 	
 	public JmxDataGetter(String serviceUrl, String username, String password, int interval, int maxCount, String outputPath) {
 		this.serviceUrl = serviceUrl;
@@ -37,6 +39,17 @@ public class JmxDataGetter implements Runnable{
 		this.interval = interval;
 		this.maxCount = maxCount;
 		this.outputPath = outputPath;
+	}
+	
+	public JmxDataGetter(String serviceUrl, String username, String password, int interval, int maxCount, String outputPath,String nodename) {
+		this.serviceUrl = serviceUrl;
+		this.username = username;
+		this.password = password;
+		this.interval = interval;
+		this.maxCount = maxCount;
+		this.outputPath = outputPath;
+		this.nodeNameAdditional=nodename;
+		
 	}
 	
 	public void proceed() {
@@ -65,8 +78,8 @@ public class JmxDataGetter implements Runnable{
 			
 			String hostname = (String) jmxHostnameObject;
 			
-			String nodeName = (String) jmxNodeName;
-			String fullpathFile = outputPath+"/"+hostname+"-"+nodeName+".csv";
+			String nodeName = nodeNameAdditional!=null ? nodeNameAdditional: (String) jmxNodeName;
+			String fullpathFile = outputPath+File.separator+hostname+"-"+nodeName+".csv";
 			
 			/*String nodeNameSplit[] = nodeName.split("\\/");
 			String fullpathFile = outputPath+"/"+hostname+"-"+nodeNameSplit[3]+".csv";*/
@@ -103,8 +116,11 @@ public class JmxDataGetter implements Runnable{
 			    /* Flush tiap n jumlah data.
 			     * Ketika flush data langsung ditulis ke file, biar data nggak ilang ketika ctrl+c atau kill */
 			    
-			    if(count % 100 == 0)
+			    if(count % 100 == 0) {
 			    	writer.flush();
+			    	System.out.println("flush file name "+fullpathFile);
+			    }
+			    	
 				
 				Thread.sleep(1000 * interval);
 				count++;
