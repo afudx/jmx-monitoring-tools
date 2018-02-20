@@ -10,7 +10,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.sun.org.apache.xml.internal.utils.URI;
 
 public class SummaryMonitoring {
 	String fileName="SumMon_btw_pfrom_and_pend.csv";

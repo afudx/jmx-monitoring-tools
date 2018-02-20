@@ -3,10 +3,11 @@ package id.nullpointr;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.sun.org.apache.xml.internal.utils.URI;
 
 public class MainClass {
 	
@@ -29,7 +30,11 @@ public class MainClass {
 				System.out.println("Path : "+path);
 				path=path.replaceAll(" ", "%20");
 				System.out.println("Path Replace : "+path);
-				fileReader = new FileReader(new URI(path).getPath());
+				try {
+					fileReader = new FileReader(new URI(path).getPath());
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
 				bufferredReadder = new BufferedReader(fileReader);
 				String sCurrentLine;
 				
