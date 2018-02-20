@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MainClass {
+public class MainClassJmxMonitor {
 	
 	public static void main(String[] args) {
 		if(args.length <=0) {
@@ -47,10 +47,10 @@ public class MainClass {
 						int maxCount = Integer.parseInt(connectionData[4]);
 						String outputPath= connectionData[5];
 						outputPath=outputPath.replaceAll(" ","%20");
-						if(connectionData.length>6) {
+						if (connectionData.length > 6) {
 							String nodeName=connectionData[6];
-							executor.execute(new JmxDataGetter(connectionUrl, username, password, interval, maxCount, outputPath,nodeName));
-						}else {
+							executor.execute(new JmxDataGetter(connectionUrl, username, password, interval, maxCount, outputPath, nodeName));
+						} else {
 							executor.execute(new JmxDataGetter(connectionUrl, username, password, interval, maxCount, outputPath));
 						}
 					}
