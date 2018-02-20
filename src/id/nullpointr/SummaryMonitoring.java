@@ -23,7 +23,7 @@ public class SummaryMonitoring {
 	boolean header=true;
 	Long gigaByte=(long) (1024*1024*1024);
 	DecimalFormat df = new DecimalFormat("#.####");  
-	void summary(String path,String from,String end) throws Exception{
+	public void summary(String path,String from,String end) throws Exception{
 		
 		fileName=fileName.replace("pfrom", from);
 		fileName=fileName.replace("pend", end);

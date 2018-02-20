@@ -59,30 +59,26 @@ public class JmxDataGetter implements Runnable{
 		map.put("jmx.remote.credentials",credentials);
 		
 		JMXConnector connector = null;
-		
 		BufferedWriter writer = null;
+		Object jmxMemoryObject = null;
+		Object jmxHostnameObject = null;
+		Object jmxNodeName = null;
+		int count = 1;
 		
 		try {
 			System.out.println("Connecting to: "+serviceUrl);
 			connector = JMXConnectorFactory.newJMXConnector(new JMXServiceURL(serviceUrl), map);
 			connector.connect();
 			
-			Object jmxMemoryObject = null;
-			Object jmxHostnameObject = null;
-			Object jmxNodeName = null;
+			if(nodeNameAdditional.toLowerCase().contains("crappie") || nodeNameAdditional.toLowerCase().contains("bowfin")) {
+				jmxHostnameObject = connector.getMBeanServerConnection().getAttribute(new ObjectName("jboss.as:core-service=server-environment"), "hostName");
+				jmxNodeName = connector.getMBeanServerConnection().getAttribute(new ObjectName("jboss.as:core-service=server-environment"), "nodeName");
+			}
 			
-			int count = 1;
+			String hostname = jmxHostnameObject != null ? (String) jmxHostnameObject : nodeNameAdditional.split("_")[0];
 			
-			jmxHostnameObject = connector.getMBeanServerConnection().getAttribute(new ObjectName("jboss.as:core-service=server-environment"), "hostName");
-			jmxNodeName = connector.getMBeanServerConnection().getAttribute(new ObjectName("jboss.as:core-service=server-environment"), "nodeName");
-			
-			String hostname = (String) jmxHostnameObject;
-			
-			String nodeName = nodeNameAdditional!=null ? nodeNameAdditional: (String) jmxNodeName;
-			String fullpathFile = outputPath+File.separator+hostname+"-"+nodeName+".csv";
-			
-			/*String nodeNameSplit[] = nodeName.split("\\/");
-			String fullpathFile = outputPath+"/"+hostname+"-"+nodeNameSplit[3]+".csv";*/
+			String nodeName = nodeNameAdditional != null ? nodeNameAdditional : (String) jmxNodeName;
+			String fullpathFile = outputPath + File.separator + nodeName + ".csv";
 			
 			System.out.println("Writing to: "+fullpathFile);
 			
