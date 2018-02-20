@@ -116,15 +116,17 @@ public class JmxDataGetter implements Runnable{
 			    /* Flush tiap n jumlah data.
 			     * Ketika flush data langsung ditulis ke file, biar data nggak ilang ketika ctrl+c atau kill */
 			    
-			    if(count % 100 == 0) {
+			    if(count % 10 == 0) {
 			    	writer.flush();
-			    	System.out.println("flush file name "+fullpathFile);
+			    	System.out.println(fullpathFile+" flushing!!");
 			    }
 			    	
 				
 				Thread.sleep(1000 * interval);
 				count++;
 			}
+			writer.flush();
+	    	System.out.println(fullpathFile+" flushing!!");
 			
 		} catch (AttributeNotFoundException | InstanceNotFoundException | MalformedObjectNameException | MBeanException
 				| ReflectionException | IOException | InterruptedException e) {
