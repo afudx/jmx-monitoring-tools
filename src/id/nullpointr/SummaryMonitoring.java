@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class SummaryMonitoring {
+	private String baseFileName = "SumMon_btw_pfrom_and_pend.csv";
 	private File outputFileSummary = null;
 	private DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	private DateFormat dateFormat2 = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -23,8 +24,7 @@ public class SummaryMonitoring {
 	private DecimalFormat df = new DecimalFormat("#.####");
 
 	public void summary(String inputPath, String fileNameAdditional, String startTime, String endTime) throws Exception {
-		String baseFileName = "SumMon_btw_pfrom_and_pend.csv";
-		
+
 		baseFileName = baseFileName.replace("pfrom", startTime);
 		baseFileName = baseFileName.replace("pend", endTime);
 		
@@ -48,17 +48,17 @@ public class SummaryMonitoring {
 			return;
 		}
 		
-		File[] files = inputDirectory.listFiles();
+		File[] filesInDirectory = inputDirectory.listFiles();
 		
-		for (File file : files) {
+		for (File file : filesInDirectory) {
 			if (!file.getName().contains("SumMon_btw"))
-				summaryFromFile(file, dfrom, dend);
+				summaryFromFile(file, null, dfrom, dend);
 		}
 	}
 
-	public void summaryFromFile(File file, Date from, Date end) throws Exception {
+	public void summaryFromFile(File inputFile, File outputFileSummaryAlternative, Date from, Date end) throws Exception {
 		
-		System.out.println("Starting Summary ...");
+		System.out.println("Starting summary ...");
 		
 		FileReader fileReader = null;
 		BufferedReader bufferredReadder = null;
@@ -68,13 +68,13 @@ public class SummaryMonitoring {
 		Long count = 0L;
 		
 		try {
-			fileReader = new FileReader(file);
+			fileReader = new FileReader(inputFile);
 			bufferredReadder = new BufferedReader(fileReader);
 			String sCurrentLine;
 			boolean firstLine = true;
 			boolean exit = true;
 
-			System.out.println("Summary File : " + file.getName());
+			System.out.println("Summary file input: " + inputFile.getName());
 
 			while ((sCurrentLine = bufferredReadder.readLine()) != null && exit) {
 				if (firstLine) {
@@ -82,7 +82,18 @@ public class SummaryMonitoring {
 				} else {
 					String[] datas = sCurrentLine.split(",");
 					Date dateData = dateFormat.parse(datas[0]);
-					if (from.before(dateData)) {
+					if (from.before(dateData) && end.after(dateData)) {
+						Long used = Long.valueOf(datas[3]);
+						count++;
+						avg += used;
+						max = (max < used) ? used : max;
+						min = (min > used) ? used : min;
+					}else {
+						System.out.println("Exit processing file: " + inputFile.getName());
+						exit = false;
+					}
+					
+					/*if (from.before(dateData)) {
 						if (end.after(dateData)) {
 							Long used = Long.valueOf(datas[3]);
 							count++;
@@ -90,10 +101,10 @@ public class SummaryMonitoring {
 							max = (max < used) ? used : max;
 							min = (min > used) ? used : min;
 						} else {
-							System.out.println("exit file : " + file.getName());
+							System.out.println("exit file : " + inputFile.getName());
 							exit = false;
 						}
-					}
+					}*/
 				}
 
 			}
@@ -105,14 +116,19 @@ public class SummaryMonitoring {
 			}
 		}
 
-		appendFile(file.getName(), count, min, avg, max);
+		appendFile(inputFile.getName(), outputFileSummaryAlternative, count, min, avg, max);
 
 	}
 
-	public void appendFile(String fileName, Long count, Long min, Long avg, Long max) {
+	public void appendFile(String fileName, File outputFileSummaryAlternative, Long count, Long min, Long avg, Long max) {
 		BufferedWriter writer = null;
 		try {
-			writer = new BufferedWriter(new FileWriter(outputFileSummary.getAbsolutePath(), true));
+			
+			if(outputFileSummaryAlternative == null)
+				writer = new BufferedWriter(new FileWriter(outputFileSummary.getAbsolutePath(), true));
+			else
+				writer = new BufferedWriter(new FileWriter(outputFileSummaryAlternative.getAbsolutePath(), true));
+			
 			if (header) {
 				writer.append("Name Node,COUNT,MIN(GB),AVG(GB),MAX(GB)");
 				writer.newLine();
@@ -144,7 +160,6 @@ public class SummaryMonitoring {
 			writer.flush();
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 
@@ -153,7 +168,6 @@ public class SummaryMonitoring {
 					writer.close();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
