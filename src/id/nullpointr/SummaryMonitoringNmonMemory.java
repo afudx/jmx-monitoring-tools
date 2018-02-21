@@ -49,8 +49,13 @@ public class SummaryMonitoringNmonMemory {
 			if(cpuString.equals("1")) {
 				fileOutput=new File(normarPath+serverName+"-cpu-summary.csv");
 				fileOutput.createNewFile();
-				System.out.println("## File "+fileOutput.getAbsolutePath()+"Is Created");
+				System.out.println("## File "+fileOutput.getAbsolutePath()+" Is Created");
 				summaryCPU(fileName,configServer);
+			}else {
+				fileOutput=new File(normarPath+serverName+"-mem-summary.csv");
+				fileOutput.createNewFile();
+				System.out.println("## File "+fileOutput.getAbsolutePath()+" Is Created");
+				summaryMEM(fileName,configServer);
 			}
 			
 		}catch (Exception e) {
@@ -77,7 +82,7 @@ public class SummaryMonitoringNmonMemory {
 			while ((sCurrentLine = bufferredReadder.readLine()) != null) {
 				String configData[] = sCurrentLine.split(",");
 				String startTime=configData[1].trim().length()==8 ? configData[1]: "0"+configData[1];
-				String endtime=configData[2].trim().length()==8 ? configData[2].trim(): "0"+configData[1].trim();
+				String endtime=configData[2].trim().length()==8 ? configData[2].trim(): "0"+configData[2].trim();
 				Date dstartDate=sdf.parse(configData[0].trim()+ startTime);
 				Date dendTime=sdf.parse(configData[0].trim()+ endtime);
 				if(serverName.equalsIgnoreCase(configData[3])) {
@@ -100,7 +105,48 @@ public class SummaryMonitoringNmonMemory {
 		
 		}
 		
-	
+
+ public void summaryMEM(String fileName,String configServer) throws Exception{
+		
+		BufferedReader bufferredReadder = null;
+		FileReader fileReader = null;
+
+		
+		try {
+			System.out.println(""+normarPath+configServer);
+			File file = new File(normarPath+configServer);
+			fileReader = new FileReader(file.getAbsolutePath());
+			bufferredReadder = new BufferedReader(fileReader);
+			String sCurrentLine;
+			
+
+			while ((sCurrentLine = bufferredReadder.readLine()) != null) {
+				String configData[] = sCurrentLine.split(",");
+				String startTime=configData[1].trim().length()==8 ? configData[1]: "0"+configData[1];
+				String endtime=configData[2].trim().length()==8 ? configData[2].trim(): "0"+configData[2].trim();
+				Date dstartDate=sdf.parse(configData[0].trim()+ startTime);
+				Date dendTime=sdf.parse(configData[0].trim()+ endtime);
+				if(serverName.equalsIgnoreCase(configData[3])) {
+					summaryCountMEM(configData[4],configData[0],dstartDate,dendTime,fileName);	
+				}
+			}
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			if(bufferredReadder!=null) {
+				try {
+				bufferredReadder.close();}catch (Exception e) {
+					// TODO: handle exception
+				}
+			}
+		}
+		
+		
+		}
+		
+
 	public void summaryCountCPU(String moduleName,String date,Date startDate, Date endTime, String fileSource) {
 		
 		BufferedReader bufferredReadder = null;
@@ -156,7 +202,64 @@ public class SummaryMonitoringNmonMemory {
 		
 		
 	}
-	
+public void summaryCountMEM(String moduleName,String date,Date startDate, Date endTime, String fileSource) {
+		
+		BufferedReader bufferredReadder = null;
+		FileReader fileReader = null;
+		
+		try {
+			File file = new File(normarPath+fileSource);
+			fileReader = new FileReader(file.getAbsolutePath());
+			bufferredReadder = new BufferedReader(fileReader);
+			String sCurrentLine;
+			boolean firstLine=true;
+			boolean exit=true;
+			double avg=0L;
+			double max=0L;
+			double min=999999999999999L;
+			Long count=0L;
+			
+			
+			while ((sCurrentLine = bufferredReadder.readLine()) != null && exit) {
+				String datas[] = sCurrentLine.split(",");
+				if(firstLine) {
+					firstLine=false;
+				}else{
+					Date dateData =sdf.parse(date+((datas[0]).length()==8 ? datas[0]:"0"+datas[0]));
+					if(startDate.before(dateData)) {
+						if(endTime.after(dateData)) {
+							double memTotal=Double.valueOf(datas[1]);
+							double memFree=Double.valueOf(datas[5]);
+							
+							double used=((memTotal-memFree)/memTotal)*100;
+							
+							count++;
+							avg+=used;
+							max=(max<used) ? used:max;
+							min=(min>used) ? used:min;
+						}else {
+							exit=false;
+						}
+					}
+					
+				}
+			}
+			appendFile(moduleName,count,min,avg,max);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			if(bufferredReadder!=null) {
+				try {
+				bufferredReadder.close();}catch (Exception e) {
+					// TODO: handle exception
+				}
+			}
+		}
+		
+		
+	}
 	public void appendFile(String module,long count,double min,double avg,double max) {
 		BufferedWriter writer = null;
 	try {
@@ -187,6 +290,8 @@ public class SummaryMonitoringNmonMemory {
 			writer.newLine();
 			writer.flush();
 			System.out.println("Summary Transaction Modul "+ module+ " Is Finish");
+		}else {
+			System.out.println("Config "+module+ " Not Having Data");
 		}
 	} catch (Exception e) {
 		// TODO Auto-generated catch block
