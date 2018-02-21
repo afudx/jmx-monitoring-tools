@@ -77,8 +77,12 @@ public class MainClassJmxMonitor {
 				}
 			} else if ("SUMMARY".equalsIgnoreCase(monitoring)) {
 				SummaryMonitoring summaryMonitoring = new SummaryMonitoring();
+				String inputPath = args[1];
+				String fileName = "";
+				String startTime = args[2];
+				String endTime = args[3];
 				try {
-					summaryMonitoring.summary(args[1], args[2], args[3]);
+					summaryMonitoring.summary(inputPath, "", startTime, endTime);
 					System.out.println("Finish Process Transaction");
 				} catch (Exception e) {
 					e.printStackTrace();
