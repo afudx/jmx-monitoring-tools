@@ -83,7 +83,13 @@ public class MainClassJmxMonitor {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+			}else if("SUM-NMON".equals(monitoring)) {
+				new SummaryMonitoringNmonMemory();
+				System.out.println("FINISH");
+			}else {
+				System.out.println("NOT MENU");
 			}
+			
 
 		}
 	}
