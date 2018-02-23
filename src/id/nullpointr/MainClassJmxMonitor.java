@@ -45,8 +45,9 @@ public class MainClassJmxMonitor {
 							outputPath = outputPath.replaceAll(" ", "%20");
 							if (connectionData.length > 6) {
 								String nodeName = connectionData[6];
+								int heapTreshold = Integer.parseInt(connectionData[7]);
 								executor.execute(new JmxDataGetter(connectionUrl, username, password, interval,
-										maxCount, outputPath, nodeName));
+										maxCount, outputPath, nodeName,heapTreshold));
 							} else {
 								executor.execute(new JmxDataGetter(connectionUrl, username, password, interval,
 										maxCount, outputPath));

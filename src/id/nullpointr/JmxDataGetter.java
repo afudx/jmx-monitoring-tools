@@ -31,6 +31,8 @@ public class JmxDataGetter implements Runnable{
 	int interval = 1;
 	String outputPath = null;
 	String nodeNameAdditional=null;
+	AudioPlayer audio = null;
+	float heapTreshold = 0;
 	
 	public JmxDataGetter(String serviceUrl, String username, String password, int interval, int maxCount, String outputPath) {
 		this.serviceUrl = serviceUrl;
@@ -41,7 +43,7 @@ public class JmxDataGetter implements Runnable{
 		this.outputPath = outputPath;
 	}
 	
-	public JmxDataGetter(String serviceUrl, String username, String password, int interval, int maxCount, String outputPath,String nodename) {
+	public JmxDataGetter(String serviceUrl, String username, String password, int interval, int maxCount, String outputPath,String nodename, float heapTreshold) {
 		this.serviceUrl = serviceUrl;
 		this.username = username;
 		this.password = password;
@@ -49,7 +51,9 @@ public class JmxDataGetter implements Runnable{
 		this.maxCount = maxCount;
 		this.outputPath = outputPath;
 		this.nodeNameAdditional=nodename;
+		this.heapTreshold = heapTreshold;
 		
+		audio = new AudioPlayer("/data/download/siren.wav", 2000);
 	}
 	
 	public void proceed() {
@@ -94,16 +98,21 @@ public class JmxDataGetter implements Runnable{
 				CompositeData memory = (CompositeData) jmxMemoryObject;
 				date = new Date();
 				
+				float init = Float.parseFloat(memory.get("init").toString());
+				float committed = Float.parseFloat(memory.get("committed").toString());
+				float used = Float.parseFloat(memory.get("used").toString());
+				float max = Float.parseFloat(memory.get("max").toString());
+				
 				StringBuffer heapData = new StringBuffer();
 				heapData.append(dateFormat.format(date));
 				heapData.append(",");
-				heapData.append(memory.get("init"));
+				heapData.append(init);
 				heapData.append(",");
-				heapData.append(memory.get("committed"));
+				heapData.append(committed);
 				heapData.append(",");
-				heapData.append(memory.get("used"));
+				heapData.append(used);
 				heapData.append(",");
-				heapData.append(memory.get("max"));
+				heapData.append(max);
 				
 			    writer.append(heapData.toString());
 			    writer.newLine();
@@ -116,8 +125,17 @@ public class JmxDataGetter implements Runnable{
 			    	writer.flush();
 			    	System.out.println(fullpathFile+" flushing!!");
 			    }
+			    
+			    float currentHeapPresentage = (used / init) * 100;
+			    
+			    if(currentHeapPresentage > heapTreshold) {
+			    	System.out.println("Heap usage of "+nodeNameAdditional+" reach more than heap treshold ("+heapTreshold+")");
+			    	System.out.println("Current heap utilization: "+currentHeapPresentage+"%");
 			    	
-				
+			    	audio.play();
+			    }
+			    	
+			    
 				Thread.sleep(1000 * interval);
 				count++;
 			}
