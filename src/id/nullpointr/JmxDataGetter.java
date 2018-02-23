@@ -53,7 +53,7 @@ public class JmxDataGetter implements Runnable{
 		this.nodeNameAdditional=nodename;
 		this.heapTreshold = heapTreshold;
 		
-		audio = new AudioPlayer("/data/download/siren.wav", 2000);
+		audio = new AudioPlayer("audio.wav", 2000);
 	}
 	
 	public void proceed() {
