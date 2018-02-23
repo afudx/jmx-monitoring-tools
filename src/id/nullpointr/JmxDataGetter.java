@@ -123,7 +123,7 @@ public class JmxDataGetter implements Runnable{
 			    
 			    if(count % 10 == 0) {
 			    	writer.flush();
-			    	System.out.println(fullpathFile+" flushing!!");
+			    	//System.out.println(fullpathFile+" flushing!!");
 			    }
 			    
 			    float currentHeapPresentage = (used / init) * 100;
