@@ -20,6 +20,11 @@ public class AudioPlayer {
 		this.playTime = playTime;
 	}
 	
+	public static void main(String[] args) {
+		AudioPlayer aud = new AudioPlayer("audio.wav", 3000);
+		aud.play();
+	}
+	
 	public void play() {
 		File audioFile = new File(audioFilePath);
 		AudioInputStream audioStream = null;

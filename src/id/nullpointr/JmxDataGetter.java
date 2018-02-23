@@ -130,6 +130,7 @@ public class JmxDataGetter implements Runnable{
 			    if(currentHeapPresentage > heapTreshold) {
 			    	System.out.println("Heap usage of "+nodeNameAdditional+" reach more than heap treshold ("+heapTreshold+")");
 			    	System.out.println("Current heap utilization: "+currentHeapPresentage+"%");
+			    	System.out.println("");
 			    	
 			    	audio.play();
 			    }
